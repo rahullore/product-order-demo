@@ -14,8 +14,15 @@ useHead({
         <section>
             <h2 class="text-lg font-semibold mb-4">Order List</h2>
 
-            <div v-if="orders.length === 0" class="text-sm text-gray-600">
-                No orders have been placed yet.
+            <div v-if="orders.length === 0" 
+                class="bg-white border border-dashed border-gray-300 rounded-lg p-8 text-center text-gray-500">
+                <p class="text-lg font-medium mb-2">No orders have been placed yet.</p>
+                <p class ="text-sm mb-4">Go to the Products page and place your first order.</p>
+                <NuxtLink
+                    to="/products"
+                    class="inline-block bg-blue-600 text-white text-sm px-4 py-2 rounded hover:bg-blue-700">
+                    Browse Products
+                </NuxtLink>
             </div>
             <div v-else class="space-y-4">
                 <article v-for="(order, index) in orders" :key="index" class="bg-white rounded-lg shadow p-4 border border-gray-100">

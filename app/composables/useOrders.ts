@@ -10,36 +10,18 @@ export type Order = {
 const STORAGE_KEY = 'my-orders';
 
 export const useOrders = () => {
-  const orders = useState<Order[]>(STORAGE_KEY, () => {
-    if (process.client) {
-        const storedOrders = localStorage.getItem(STORAGE_KEY);
-        return storedOrders ? JSON.parse(storedOrders) : [];
-        }
-        return [];
-  });
-
-  const syncOrderFromStorage = () => {
+  
+  const orders = useState<Order[]>('orders', () => {
     if (process.client) {
       const storedOrders = localStorage.getItem(STORAGE_KEY);
-      if (storedOrders) {
-      orders.value = storedOrders ? JSON.parse(storedOrders) : [];
-      }
+      return storedOrders ? JSON.parse(storedOrders) : [];
     }
-  };
+    return [];
+  });
 
-  if(!process.client){
-    window.addEventListener('storage', (event) => {
-        if (event.key === STORAGE_KEY) {
-            console.log('Storage event detected for orders. Syncing...');
-            syncOrderFromStorage();
-        }
-    });
-    syncOrderFromStorage();
-  }
-
-  function saveOrdersToStorage(currentOrders: Order[]) {
+  function persist() {
     if (process.client) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(currentOrders));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(orders.value));
     }
   }
 
@@ -49,12 +31,9 @@ export const useOrders = () => {
       createdAt: new Date().toISOString(),
       ...order
     };
-
-    // Replace the array to keep reactivity predictable.
-    orders.value = [...orders.value, newOrder];
-    //orders.value.push(newOrder);
-    console.log('Order added:', orders.value);
-    saveOrdersToStorage(orders.value);
+    orders.value.push(newOrder);
+    persist();
+    console.log('Order added:', newOrder);
   }
 
   return {

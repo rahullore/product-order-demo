@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import OrderForm from '~/components/OrderForm.vue';
+
 
 type Product = {
   id: number;
@@ -43,7 +43,7 @@ function closeOrderForm() {
 
         <div v-if="pending" class="text-sm text-gray-600">Loading products...</div>
         <div v-else-if="error" class="text-sm text-red-600">Error loading products: {{ error.message }}</div>
-        <div v-else class="space-y-4">
+        <!--<div v-else class="space-y-4">
             <article v-for="product in products" :key="product.id" class="bg-white rounded-lg shadow p-4 border border-gray-100">
                 <h3 class="text-md font-semibold text-gray-800">{{ product.name }}</h3>
                 <p class="text-sm text-gray-700 mb-2">{{ product.description }}</p>
@@ -57,6 +57,14 @@ function closeOrderForm() {
                     Place Order
                 </button>
             </article>
+        </div>-->
+        <div v-else class="space-y-4">
+            <ProductCard
+                v-for="product in products"
+                :key="product.id"
+                :product="product"
+                @select="openOrderForm"
+            />
         </div>
         <OrderForm
             v-if="selectedProduct"
