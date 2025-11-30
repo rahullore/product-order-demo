@@ -1,4 +1,5 @@
 <script setup>
+
 const route = useRoute();
 const {orders} = useOrders();
 </script>
@@ -24,5 +25,6 @@ const {orders} = useOrders();
         <main class="max-w-4xl mx-auto px-4 py-8">
             <slot />
         </main>
+        <ToastContainer />
     </div>
 </template>

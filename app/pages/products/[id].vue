@@ -1,5 +1,8 @@
 <script setup lang="ts">
+import OrderForm from '~/components/OrderForm.vue';
+
 const route = useRoute();
+const {addOrder} = useOrders();
 
 console.log("DETAIL PAGE MOUNTED. id =", route.params.id)
 
@@ -35,6 +38,20 @@ useHead(()=>({
     title: pageTitle.value,
 }))
 
+const showOrderForm = ref(false);
+function handleSubmit(quantity:number){
+    if(!product.value) return;
+
+    addOrder({
+        productId: product.value.id,
+        productName: product.value.name,
+        quantity,
+        price: product.value.price,
+    });
+
+    console.log("Order submitted from details page");
+    showOrderForm.value = false;
+}
     
 </script>
 
@@ -62,7 +79,23 @@ useHead(()=>({
                     <span class="text-sm text-gray-600">Stock: {{ product.stock }}</span>
                 </div>
                 <p class="text-xs text-gray-500">Product ID: {{ product.id }}</p>
+                <button
+                    type="button"
+                    class="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                    @click="showOrderForm = true">
+                    Place Order
+                </button>
             </div>
         </div>
+        <OrderForm
+            v-if="showOrderForm && product"
+            :product="{
+                id: product.id,
+                name: product.name,
+                price: product.price
+            }"
+            @close="showOrderForm = false"
+            @submit="handleSubmit"
+        />
     </section>
 </template>

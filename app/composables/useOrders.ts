@@ -19,6 +19,8 @@ export const useOrders = () => {
     return [];
   });
 
+  const { showToast } = useToasts();
+
   function persist() {
     if (process.client) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(orders.value));
@@ -34,6 +36,7 @@ export const useOrders = () => {
     orders.value.push(newOrder);
     persist();
     console.log('Order added:', newOrder);
+    showToast(`Order for ${newOrder.productName} added successfully!`, 'success');
   }
 
   return {

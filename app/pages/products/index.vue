@@ -35,11 +35,35 @@ function closeOrderForm() {
   selectedProduct.value = null;
 }
 
+const searchTerm = ref('');
+
+const filteredProducts = computed(() => {
+    if(!products.value) return [];
+    const term = searchTerm.value.toLowerCase();
+    if(!term) return products.value;
+
+    return products.value.filter(p=>
+        p.name.toLowerCase().includes(term) ||
+        p.description.toLowerCase().includes(term)
+    );  
+});
+
 </script>
 
 <template>
     <section>
         <h2 class="text-lg font-semibold mb-4">Product List</h2>
+        <div class="mb-4">
+            <label class="block text-sm text-gray-700 mb-1">
+                Search Products:
+                <input
+                    type="text"
+                    v-model="searchTerm"
+                    placeholder="Enter product name or description"
+                    class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+            </label>
+        </div>
 
         <div v-if="pending" class="text-sm text-gray-600">Loading products...</div>
         <div v-else-if="error" class="text-sm text-red-600">Error loading products: {{ error.message }}</div>
@@ -60,7 +84,7 @@ function closeOrderForm() {
         </div>-->
         <div v-else class="space-y-4">
             <ProductCard
-                v-for="product in products"
+                v-for="product in filteredProducts"
                 :key="product.id"
                 :product="product"
                 @select="openOrderForm"
