@@ -39,8 +39,16 @@ export const useOrders = () => {
     showToast(`Order for ${newOrder.productName} added successfully!`, 'success');
   }
 
+  function clearOrders(){
+    if(orders.value.length === 0) return;
+    orders.value = [];
+    persist();
+    showToast('All orders cleared.', 'info');
+  }
+
   return {
     orders,
-    addOrder
+    addOrder,
+    clearOrders
   };
 };

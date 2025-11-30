@@ -60,13 +60,13 @@ const filteredProducts = computed(() => {
                     type="text"
                     v-model="searchTerm"
                     placeholder="Enter product name or description"
-                    class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    class="w-full rounded-md border border-gray-300 dark:border-slate-600 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
             </label>
         </div>
 
-        <div v-if="pending" class="text-sm text-gray-600">Loading products...</div>
-        <div v-else-if="error" class="text-sm text-red-600">Error loading products: {{ error.message }}</div>
+        <div v-if="pending" class="text-sm text-gray-600 dark:text-slate-300">Loading products...</div>
+        <div v-else-if="error" class="text-sm text-red-600 dark:text-red-400">Error loading products: {{ error.message }}</div>
         <!--<div v-else class="space-y-4">
             <article v-for="product in products" :key="product.id" class="bg-white rounded-lg shadow p-4 border border-gray-100">
                 <h3 class="text-md font-semibold text-gray-800">{{ product.name }}</h3>

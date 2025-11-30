@@ -34,7 +34,7 @@ function submit(){
 
 <template>
     <div class="fixed inset-0 bg-block/40 flex items-center justify-center">
-        <div class="bg-white rounded-lg shadow p-6 w-80">
+        <div class="bg-white dark:bg-slate-800 rounded-lg shadow p-6 w-80">
             <h3 class ="text-lg font-semibold mb-4">
                 Place Order
             </h3>
