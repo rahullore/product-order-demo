@@ -26,3 +26,25 @@ Accept: application/json
 ### Create order (alternative with path-style params)
 POST {{baseUrl}}/api/orders?productId=2&quantity=5
 Accept: application/json
+
+###
+POST {{baseUrl}}/api/ai/chat
+Content-Type: application/json
+Accept: application/json
+
+{
+  "messages": [
+      { "role": "system", "content": "You are a helpful assistant for a customer orders system." },
+      { "role": "user", "content": "Explain what a product and an order are in simple terms." }
+    ]
+}
+
+###
+POST {{baseUrl}}/api/ai/orders/ask
+Content-Type: application/json
+Accept: application/json
+
+{
+  "question": "Summarize my last orders and total spending.",
+  "takeLastN": 5
+}

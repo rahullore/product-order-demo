@@ -9,7 +9,9 @@ type Product = {
   stock: number;
 };
 
-const {data: products,pending,error}=useFetch<Product[]>('/api/products');
+const productApiUrl = 'http://localhost:5178/api/products';
+
+const {data: products,pending,error}=useFetch<Product[]>(productApiUrl);
 
 useHead({   
   title: 'Product List - Customer Orders App',
