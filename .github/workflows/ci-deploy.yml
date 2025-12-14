@@ -35,7 +35,7 @@ jobs:
             -t rahullore/customer-orders:web.latest \
             -f ./Dockerfile . \
           docker push rahullore/customer-orders:web.latest
-
+git push
       - name: Deploy to Server
         uses: appleboy/ssh-action@v1.2.0
         with:
