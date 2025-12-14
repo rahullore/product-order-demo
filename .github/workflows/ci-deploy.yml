@@ -47,7 +47,7 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            cd ~/customer-orders-app
+            cd ~/developer/customer-orders-app
             docker compose -f docker-compose.prod.yml pull
             docker compose down
             docker compose -f docker-compose.prod.yml up -d --force-recreate 
