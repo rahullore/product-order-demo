@@ -17,8 +17,8 @@
       <div v-for="order in orders" :key="order.id" class="order-card">
         <div class="order-header">
           <h3>Order #{{ order.id }}</h3>
-          <span class="status" :class="`status-${order.status.toLowerCase()}`">
-            {{ order.status }}
+          <span class="status" :class="`status-${getStatusName(order.status).toLowerCase()}`">
+            {{ getStatusName(order.status) }}
           </span>
         </div>
         
@@ -42,8 +42,8 @@
 
         <div class="order-actions">
           <select 
-            v-model="order.status" 
-            @change="updateOrderStatus(order.id, order.status)"
+            :value="getStatusName(order.status)" 
+            @change="updateOrderStatus(order.id, ($event.target as HTMLSelectElement).value)"
             class="status-select"
           >
             <option value="Pending">Pending</option>
@@ -72,7 +72,7 @@ interface Order {
   customerName: string
   customerEmail?: string
   orderDate: string
-  status: string
+  status: number | string
   items: OrderItem[]
   totalAmount: number
 }
@@ -85,16 +85,29 @@ const config = useRuntimeConfig()
 
 const { data: orders, pending, error, refresh } = await useFetch<Order[]>(`${config.public.apiBase}/api/orders`)
 
+const statusNames = ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled']
+
+const getStatusName = (status: number | string): string => {
+  if (typeof status === 'string') return status
+  return statusNames[status] || 'Unknown'
+}
+
 const formatDate = (dateString: string) => {
   const date = new Date(dateString)
   return date.toLocaleDateString() + ' ' + date.toLocaleTimeString()
 }
 
-const updateOrderStatus = async (orderId: number, status: string) => {
+const updateOrderStatus = async (orderId: number, status: number | string) => {
   try {
+    // Convert string status name to number if needed
+    let statusValue = status
+    if (typeof status === 'string') {
+      statusValue = statusNames.indexOf(status)
+    }
+    
     await $fetch(`${config.public.apiBase}/api/orders/${orderId}/status`, {
       method: 'PATCH',
-      body: JSON.stringify(status),
+      body: JSON.stringify(statusValue),
       headers: {
         'Content-Type': 'application/json'
       }
