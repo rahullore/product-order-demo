@@ -45,7 +45,7 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           source: "docker-compose.prod.yml"
-          target: "~/developer/customer-orders-app/docker-compose.prod.yml"
+          target: "~/developer/customer-orders-app/"
 
       - name: Deploy to Server
         uses: appleboy/ssh-action@v1.2.0
