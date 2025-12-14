@@ -25,7 +25,7 @@ jobs:
       - name: Build and push Docker images
         run : |
           docker buildx build \
-            --platform linux/arm64 \ 
+            --platform linux/amd64 \ 
             -t rahullore/customer-orders:app.latest \
             -f ./CustomerOrders.Api/Dockerfile \
             .
@@ -33,9 +33,9 @@ jobs:
           docker push rahullore/customer-orders:app.latest
             
           docker buildx build \
-            --platform linux/arm64 \ 
+            --platform linux/amd64 \ 
             -t rahullore/customer-orders:web.latest \
-            -f ./CustomerOrders.Web/Dockerfile \
+            -f ./Dockerfile \
             .
 
           docker push rahullore/customer-orders:web.latest
