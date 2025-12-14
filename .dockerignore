@@ -1,0 +1,13 @@
+**/.git
+**/.gitignore
+**/node_modules
+**/.nuxt
+**/.output
+**/dist
+**/bin
+**/obj
+**/.env
+**/.env.*
+**/*.user
+**/*.suo
+   
