@@ -26,15 +26,15 @@ jobs:
         run : |
           docker buildx build \
             --platform linux/arm64 \ 
-            -t rahullore/customer-orders-api:latest \
+            -t rahullore/customer-orders:app.latest \
             -f ./CustomerOrders.Api/Dockerfile . \
-          docker push rahullore/customer-orders-api:latest
+          docker push rahullore/customer-orders:app.latest
             
           docker buildx build \
             --platform linux/arm64 \ 
-            -t rahullore/customer-orders-web:latest \
+            -t rahullore/customer-orders:web.latest \
             -f ./Dockerfile . \
-          docker push rahullore/customer-orders-web:latest
+          docker push rahullore/customer-orders:web.latest
 
       - name: Deploy to Server
         uses: appleboy/ssh-action@v1.2.0
