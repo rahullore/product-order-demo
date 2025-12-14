@@ -22,10 +22,9 @@ const {addOrder} = useOrders();
 function submit(){
     addOrder({
         productId: props.product.id,
-        productName: props.product.name,
         quantity: quantity.value,
-        price: props.product.price,
     })
+    
 
     console.log("Order submitted");
     emit("close");

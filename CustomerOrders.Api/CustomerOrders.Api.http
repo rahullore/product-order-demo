@@ -19,10 +19,14 @@ GET {{baseUrl}}/api/orders/1
 Accept: application/json
 
 ### Create order (uses query params)
-POST {{baseUrl}}/api/orders?productId=1&quantity=2
+POST {{baseUrl}}/api/orders
 Content-Type: application/json
 Accept: application/json
 
+{
+  "productId": 2,
+  "quantity": 5
+}
 ### Create order (alternative with path-style params)
 POST {{baseUrl}}/api/orders?productId=2&quantity=5
 Accept: application/json

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-
+const {post,get} = useApi();
 
 type Product = {
   id: number;
@@ -9,9 +9,8 @@ type Product = {
   stock: number;
 };
 
-const productApiUrl = 'http://localhost:5178/api/products';
-
-const {data: products,pending,error}=useFetch<Product[]>(productApiUrl);
+//const productApiUrl = 'http://localhost:5178/api/products';
+//const {data: products,pending,error}=useFetch<Product[]>(productApiUrl);
 
 useHead({   
   title: 'Product List - Customer Orders App',
@@ -19,6 +18,18 @@ useHead({
         { name: 'description', content: 'Browse our list of products available for customer orders.' }
     ],
 })
+
+const{
+    data: products,
+    pending,
+    error,
+    refresh   
+} = await useAsyncData<Product[]>(
+    'products', 
+    async ()=>{
+    const res = await get<Product[]>('/api/products');
+    return res;
+});
 
 const selectedProduct = ref<null | {
   id: number;

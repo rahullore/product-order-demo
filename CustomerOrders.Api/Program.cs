@@ -69,11 +69,11 @@ app.MapGet("/api/orders/{id}", (int id, IInMemoryStore store) =>
 .WithName("GetOrderById")
 .WithOpenApi();
 
-app.MapPost("/api/orders", (int productId, int quantity, IInMemoryStore store) =>
+app.MapPost("/api/orders", (CreateOrderRequest request, IInMemoryStore store) =>
 {
     try
     {
-        var order = store.AddOrder(productId, quantity);
+        var order = store.AddOrder(request.ProductId, request.Quantity);
         return Results.Created($"/api/orders/{order.Id}", order);
     }
     catch (InvalidOperationException ex)
@@ -82,6 +82,13 @@ app.MapPost("/api/orders", (int productId, int quantity, IInMemoryStore store) =
     }
 })
 .WithName("CreateOrder")
+.WithOpenApi();
+
+app.MapDelete("/api/orders", (IInMemoryStore store) =>
+{
+    store.ClearOrders();
+    return Results.NoContent();
+}).WithName("ClearOrders")
 .WithOpenApi();
 
 app.MapPost("/api/ai/chat", async(ChatRequestDto request,IAiChatService aiChatService, CancellationToken cancellationToken) =>
@@ -106,6 +113,8 @@ app.MapPost("/api/ai/chat", async(ChatRequestDto request,IAiChatService aiChatSe
 })
 .WithName("AiChat")
 .WithOpenApi();
+
+
 
 app.MapPost("/api/ai/orders/ask", async (
     OrderAskRequestDto req,
@@ -153,7 +162,7 @@ app.MapPost("/api/ai/orders/ask", async (
 
         return Results.Ok(new OrderAskResponseDto(
             Answer: answer,
-            OdersIncluded: selectedOrders.Count,
+            OrdersIncluded: selectedOrders.Count,
             UsedOrderIds:  selectedOrders.Select(o=>o.Id).ToList()
             ));
     }
