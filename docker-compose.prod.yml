@@ -1,6 +1,6 @@
 services:
   api:
-    image: ghcr.io/<YOUR_GITHUB_USERNAME>/customer-orders-api:latest
+    image: rahullore/product-orders:app-latest
     container_name: customer-orders-api
     restart: unless-stopped
     env_file:
@@ -16,7 +16,7 @@ services:
       - appnet
 
   web:
-    image: ghcr.io/<YOUR_GITHUB_USERNAME>/customer-orders-web:latest
+    image: rahullore/product-orders:web-latest
     container_name: customer-orders-web
     restart: unless-stopped
     env_file:

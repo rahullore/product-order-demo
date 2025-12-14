@@ -26,14 +26,14 @@ jobs:
         run: |
           docker buildx build \
             --platform linux/amd64 \
-            -t rahullore/customer-orders:app-latest \
+            -t rahullore/product-orders:app-latest \
             -f ./CustomerOrders.Api/Dockerfile \
             --push \
             .
 
           docker buildx build \
             --platform linux/amd64 \
-            -t rahullore/customer-orders:web-latest \
+            -t rahullore/product-orders:web-latest \
             -f ./Dockerfile \
             --push \
             .
