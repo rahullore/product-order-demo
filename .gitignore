@@ -1,0 +1,38 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+*.userprefs
+*.cache
+.vs/
+.vscode/
+*.swp
+*.swo
+
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+.npm
+.eslintcache
+
+# Nuxt.js
+.nuxt/
+.output/
+.env
+.env.local
+.env.*.local
+dist/
+
+# IDE
+.idea/
+*.iml
+*.iws
+*.ipr
+.DS_Store
+
+# OS
+Thumbs.db
+.DS_Store
+*.log
