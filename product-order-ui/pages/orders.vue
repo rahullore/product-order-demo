@@ -113,8 +113,12 @@ const updateOrderStatus = async (orderId: number, status: number | string) => {
       }
     })
     await refresh()
-  } catch (e: any) {
-    alert('Failed to update order status: ' + (e.message || 'Unknown error'))
+  } catch (e) {
+    const errorMessage = e instanceof Error ? e.message : 'Unknown error'
+    console.error('Failed to update order status:', errorMessage)
+    if (process.client) {
+      alert('Failed to update order status: ' + errorMessage)
+    }
   }
 }
 </script>

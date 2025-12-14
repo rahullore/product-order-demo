@@ -28,22 +28,22 @@ A full-stack demo application showcasing the integration of Nuxt.js 4 (frontend)
 
 ```
 product-order-demo/
-├── ProductOrderApi/          # .NET Core 9.0 Backend
-│   ├── Controllers/          # API Controllers
+├── ProductOrderApi/           # .NET Core 9.0 Backend
+│   ├── Controllers/           # API Controllers
 │   │   ├── ProductsController.cs
 │   │   └── OrdersController.cs
-│   ├── Models/               # Data Models
+│   ├── Models/                # Data Models
 │   │   ├── Product.cs
 │   │   └── Order.cs
-│   └── Program.cs            # Application entry point
+│   └── Program.cs             # Application entry point
 │
-└── product-order-ui/         # Nuxt.js Frontend
-    ├── pages/                # Vue Pages
-    │   ├── index.vue         # Home page
-    │   ├── products.vue      # Product catalog
-    │   ├── checkout.vue      # Checkout page
-    │   └── orders.vue        # Order management
-    └── nuxt.config.ts        # Nuxt configuration
+└── product-order-ui/          # Nuxt.js Frontend
+    ├── pages/                 # Vue Pages
+    │   ├── index.vue          # Home page
+    │   ├── products.vue       # Product catalog
+    │   ├── checkout.vue       # Checkout page
+    │   └── orders.vue         # Order management
+    └── nuxt.config.ts         # Nuxt configuration
 ```
 
 ## 🚦 Getting Started

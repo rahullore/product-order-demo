@@ -111,21 +111,32 @@ const placeOrder = async () => {
       }))
     }
 
-    const response = await $fetch(`${config.public.apiBase}/api/orders`, {
+    interface OrderResponse {
+      id: number
+      customerName: string
+      customerEmail?: string
+      orderDate: string
+      status: number
+      items: CartItem[]
+      totalAmount: number
+    }
+
+    const response = await $fetch<OrderResponse>(`${config.public.apiBase}/api/orders`, {
       method: 'POST',
       body: orderData
     })
 
     success.value = true
-    orderId.value = (response as any).id
+    orderId.value = response.id
     
     // Clear cart
     cart.value = []
     if (process.client) {
       sessionStorage.removeItem('cart')
     }
-  } catch (e: any) {
-    error.value = e.message || 'Failed to place order. Please try again.'
+  } catch (e) {
+    const errorMessage = e instanceof Error ? e.message : 'Failed to place order. Please try again.'
+    error.value = errorMessage
   } finally {
     submitting.value = false
   }
