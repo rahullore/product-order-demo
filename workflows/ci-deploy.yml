@@ -1,0 +1,50 @@
+name: build and deploy product order app
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      deploy_env:
+        description: 'Deployment environment'
+        required: true
+        default: 'production'
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+      
+      - name: Build and push Docker images
+        run : |
+          docker buildx build \
+            --platform linux/arm64 \ 
+            -t rahullore/customer-orders-api:latest \
+            -f ./CustomerOrders.Api/Dockerfile . \
+            docker push rahullore/customer-orders-api:latest
+            
+          docker buildx build \
+            --platform linux/arm64 \ 
+            -t rahullore/customer-orders-web:latest \
+            -f ./Dockerfile . \
+            docker push rahullore/customer-orders-web:latest
+
+      - name: Deploy to Server
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            cd ~/customer-orders-app
+            docker compose -f docker-compose.prod.yml pull
+            docker compose down
+            docker compose -f docker-compose.prod.yml up -d --force-recreate 
+      
