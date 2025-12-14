@@ -1,0 +1,35 @@
+services:
+  api:
+    image: ghcr.io/<YOUR_GITHUB_USERNAME>/customer-orders-api:latest
+    container_name: customer-orders-api
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - ASPNETCORE_URLS=http://0.0.0.0:8080
+      - API_KEY=${API_KEY}
+      - BASE_URL=${BASE_URL}
+      - MODEL=${MODEL}
+    ports:
+      - "5178:8080"  # host port -> container port
+    networks:
+      - appnet
+
+  web:
+    image: ghcr.io/<YOUR_GITHUB_USERNAME>/customer-orders-web:latest
+    container_name: customer-orders-web
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      # important for docker/runtime (not secret)
+      - NUXT_PUBLIC_API_BASE=/demo1
+    ports:
+      - "3001:3000"
+    depends_on:
+      - api
+    networks:
+      - appnet
+
+networks:
+  appnet:

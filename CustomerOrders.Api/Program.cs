@@ -5,6 +5,10 @@ using DotNetEnv;
 using System.Data.Common;
 using System.IO.Pipelines;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.VisualBasic;
+using System.Net.Security;
+using System.Xml.Schema;
+using System.IO.Pipes;
 
 Env.Load();
 
@@ -27,9 +31,9 @@ builder.Services.AddSingleton<IOrderContextBuilder, OrderContextBuilder>();
 //load .env variable
 var openAiOptions = new OpenAiOptions
 {
-    ApiKey = Environment.GetEnvironmentVariable("ApiKey"),
-    BaseUrl = Environment.GetEnvironmentVariable("BaseUrl"),
-    Model = Environment.GetEnvironmentVariable("Model")
+    ApiKey = Environment.GetEnvironmentVariable("API_KEY"),
+    BaseUrl = Environment.GetEnvironmentVariable("BASE_URL"),
+    Model = Environment.GetEnvironmentVariable("MODEL")
 };
 builder.Services.AddSingleton(openAiOptions);
 
@@ -169,5 +173,7 @@ app.MapPost("/api/ai/orders/ask", async (
 )
 .WithName("AiOrderAsk")
 .WithOpenApi();
+
+app.UseForwardedHeaders();
 
 app.Run();
