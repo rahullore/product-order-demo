@@ -23,22 +23,22 @@ jobs:
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
       
       - name: Build and push Docker images
-        run : |
+        run: |
           docker buildx build \
-            --platform linux/amd64 \ 
-            -t rahullore/customer-orders:app.latest \
+            --platform linux/amd64 \
+            -t rahullore/customer-orders:app-latest \
             -f ./CustomerOrders.Api/Dockerfile \
-            .
-            
-          docker push rahullore/customer-orders:app.latest
-            
-          docker buildx build \
-            --platform linux/amd64 \ 
-            -t rahullore/customer-orders:web.latest \
-            -f ./Dockerfile \
+            --push \
             .
 
-          docker push rahullore/customer-orders:web.latest
+          docker buildx build \
+            --platform linux/amd64 \
+            -t rahullore/customer-orders:web-latest \
+            -f ./Dockerfile \
+            --push \
+            .
+
+   
 
       - name: Deploy to Server
         uses: appleboy/ssh-action@v1.2.0
