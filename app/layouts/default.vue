@@ -20,6 +20,8 @@ const { theme, toggleTheme } = useTheme();
                             {{ orders.length }}
                         </span>
                     </NuxtLink>
+                    <NuxtLink to="/assistant" class="hover:text-blue-600 dark:hover:text-blue-400" :class="{'text-blue-600 font-semibold' : route.path==='/assistant' }">Assistant</NuxtLink>
+
                 </nav>
                 <button
                     type="button"

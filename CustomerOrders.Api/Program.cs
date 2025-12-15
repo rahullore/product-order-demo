@@ -220,12 +220,20 @@ app.MapPost("/api/rag/ask", async(
     {
         var topK = Math.Clamp(req.TopK ?? 5, 1, 20);
         var allDocs = ragStore.GetAll();
-        Console.WriteLine($"RAG: Total documents in store: {allDocs.Count}");
+
         var top = ragService.Retrieve(req.Question, allDocs, topK);
-        Console.WriteLine($"RAG: Retrieved {top.Count} documents for question '{req.Question}'");
+
+        if(top.Count == 0)
+        {
+            return Results.Ok(new RagAskResponse(
+                Answer: "No matching orders found in the ingested data. Try rephrasing your question or ingest orders again.",
+                TopK: topK,
+                Sources: Array.Empty<object>()
+            ));
+        }
 
         var context = ragService.BuildContext(top);
-        Console.WriteLine($"RAG CONTEXT:\n{context}");
+        
         
         var message = new List<ChatMessageDto>
         {
@@ -244,11 +252,11 @@ app.MapPost("/api/rag/ask", async(
             })
             .ToList();
 
-            return Results.Ok(new RagAskResponse(
-                Answer: answer,
-                TopK: topK,
-                Sources: sources
-            ));
+        return Results.Ok(new RagAskResponse(
+            Answer: answer,
+            TopK: topK,
+            Sources: sources
+        ));
     })
     .WithName("RagAsk")
     .WithOpenApi();

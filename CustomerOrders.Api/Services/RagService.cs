@@ -8,10 +8,23 @@ public class RagService
 {
     private static readonly Regex TokenRx = new(@"[a-z0-9]+", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-    private static HashSet<string> Token(string s)=>
+    private static HashSet<string> Token(string s){
+     
+        s = NormalizeText(s);
+        return
         TokenRx.Matches(s.ToLowerInvariant())
                .Select(m => m.Value)
                .ToHashSet();
+    }
+
+    private static string NormalizeText(string t){
+        if(string.IsNullOrWhiteSpace(t))
+            return string.Empty;
+
+        if (t.EndsWith("s") && t.Length > 3)
+            return t[..^1];
+        return t;
+    }
 
     private static int OverlapScore(HashSet<string> q,string text)
     {
