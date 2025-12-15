@@ -52,3 +52,21 @@ Accept: application/json
   "question": "Summarize my last orders and total spending.",
   "takeLastN": 5
 }
+
+###
+POST {{baseUrl}}/api/rag/ingest/orders
+Content-Type: application/json
+Accept: application/json
+
+###
+POST {{baseUrl}}/api/rag/ask
+Content-Type: application/json
+Accept: application/json
+
+{
+  "question": "What product have I ordered the most?",
+  "topK": 4
+}
+
+###
+DELETE {{baseUrl}}/api/rag/clear

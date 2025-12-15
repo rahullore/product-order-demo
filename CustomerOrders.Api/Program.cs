@@ -9,6 +9,23 @@ using Microsoft.VisualBasic;
 using System.Net.Security;
 using System.Xml.Schema;
 using System.IO.Pipes;
+using System.Runtime.CompilerServices;
+using System.Runtime;
+using System.ComponentModel.DataAnnotations;
+using System.Runtime.InteropServices.Marshalling;
+using System.Net.WebSockets;
+using System.Reflection;
+using System.Reflection.Metadata;
+using System.Reflection.Metadata.Ecma335;
+using System.Linq.Expressions;
+using System.Xml;
+using System.ComponentModel;
+using System.Diagnostics.SymbolStore;
+using System.Diagnostics.CodeAnalysis;
+using System.ComponentModel.Design;
+using System.Diagnostics;
+using System.Data;
+using System.Reflection.Emit;
 
 Env.Load();
 
@@ -27,6 +44,8 @@ builder.Services.AddCors(options =>
 builder.Services.AddSingleton<IInMemoryStore, InMemoryStore>();
 builder.Services.AddHttpClient<IAiChatService, AiChatService>();
 builder.Services.AddSingleton<IOrderContextBuilder, OrderContextBuilder>();
+builder.Services.AddSingleton<RagService>();
+builder.Services.AddSingleton<RagStore>();
 //builder.Services.Configure<OpenAiOptions>(builder.Configuration.GetSection("OpenAi"));
 //load .env variable
 var openAiOptions = new OpenAiOptions
@@ -172,6 +191,74 @@ app.MapPost("/api/ai/orders/ask", async (
     }
 )
 .WithName("AiOrderAsk")
+.WithOpenApi();
+
+app.MapPost("/api/rag/ingest/orders", (IInMemoryStore store, RagStore ragStore) =>
+{
+    var orders = store.GetOrders();
+    var docs = orders.Select(o => new RagDocument(
+        Id: $"order-{o.Id}",
+        Text: $"Order {o.Id}: product={o.ProductName}, qty={o.Quantity}, unitPrice={o.Price}, createdAt={o.CreatedAtUtc}",
+        Metadata: new Dictionary<string, string>
+        {
+            {"Type", "Order" },
+            {"OrderId", o.Id.ToString() }
+        }
+    )).ToList();
+    ragStore.UpsertMany(docs);
+    return Results.Ok(new { IngestedCount = orders.Count, RagStore = ragStore.GetAll()  });
+})
+.WithName("RagIngestOrders")
+.WithOpenApi();
+
+app.MapPost("/api/rag/ask", async(
+    RagAskRequest req,
+    RagStore ragStore,
+    RagService ragService,
+    IAiChatService ai,
+    CancellationToken ct) =>
+    {
+        var topK = Math.Clamp(req.TopK ?? 5, 1, 20);
+        var allDocs = ragStore.GetAll();
+        Console.WriteLine($"RAG: Total documents in store: {allDocs.Count}");
+        var top = ragService.Retrieve(req.Question, allDocs, topK);
+        Console.WriteLine($"RAG: Retrieved {top.Count} documents for question '{req.Question}'");
+
+        var context = ragService.BuildContext(top);
+        Console.WriteLine($"RAG CONTEXT:\n{context}");
+        
+        var message = new List<ChatMessageDto>
+        {
+            new("system", "You are a helpful assistant for a customer orders system. Use ONLY the provided context. If the context is insufficient, say what is missing."),
+            new("system", $"CONTEXT:\n{context}"),
+            new("user", req.Question)
+        };
+        var answer = await ai.GetChatCompletionAsync(message, ct);
+
+        var sources = top
+            .Select(d => new
+            {
+                d.Id,
+                d.Metadata,
+                Preview = d.Text.Length > 160 ? d.Text[..160] + "..." : d.Text
+            })
+            .ToList();
+
+            return Results.Ok(new RagAskResponse(
+                Answer: answer,
+                TopK: topK,
+                Sources: sources
+            ));
+    })
+    .WithName("RagAsk")
+    .WithOpenApi();
+
+app.MapDelete("/api/rag/clear", (RagStore ragStore) =>
+{
+    ragStore.Clear();
+    return Results.NoContent();
+})
+.WithName("RagClear")
 .WithOpenApi();
 
 app.UseForwardedHeaders();
