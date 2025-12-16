@@ -129,10 +129,10 @@ async function askAiAboutOrders(){
             </div>
             <div v-else class="space-y-4">
                 <article v-for="(order, index) in orders" :key="index"
-                    class="bg-white rounded-lg shadow p-4 border border-gray-100 dark:border-slate-700">
-                    <h3 class="text-md font-semibold text-gray-800">{{ order.productName }}</h3>
-                    <p class="text-sm text-gray-700 mb-2">Quantity: {{ order.quantity }}</p>
-                    <p class="text-sm text-gray-900 font-medium">Total Price: ${{ (order.price *
+                    class="bg-white rounded-lg shadow p-4 border border-gray-200 dark:bg-slate-700 dark:border-slate-700">
+                    <h3 class="text-sm text-gray-900 dark:text-slate-100 font-medium ">{{ order.productName }}</h3>
+                    <p class="text-sm text-gray-700 dark:text-slate-300 mb-2">Quantity: {{ order.quantity }}</p>
+                    <p class="text-sm text-gray-900 dark:text-slate-100 font-medium">Total Price: ${{ (order.price *
                         order.quantity).toFixed(2) }}</p>
                 </article>
             </div>
