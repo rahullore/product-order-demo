@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { error } from '#build/ui';
+import { useApi } from "~/composables/useApi";
 
 
 const {post,del} = useApi();
@@ -16,6 +16,18 @@ type RagAskResponse = {
   sources: RagSource[];
 };
 
+type ChatItem = {
+    role: 'user' | 'assistant' | 'system';
+    content: string;
+    sources?: RagSource[];
+}
+
+type OrderAskResponse ={
+    answer:string,
+    ordersIncluded: number,
+    usedOrderIds: number[]
+}
+
 const clearing = ref<boolean>(false);
 
 const question = ref<string>('what product have I ordered the most?');
@@ -29,8 +41,12 @@ const errorMsg = ref<string | null>(null);
 
 const response = ref<RagAskResponse | null>(null);
 
+const mode = ref<'rag' | 'simple'>('rag');
+
+const chat = ref<ChatItem[]>([]);
+
 useHead({
-  title: 'RAG Assistant - Customer Orders App',
+  title: 'AI Assistant - Customer Orders App',
     meta: [
         {
         name: 'description',
@@ -63,8 +79,8 @@ async function ingestOrders(){
 
     try{
         const res = await post<any>('/api/rag/ingest/orders');
-        console.log(res);
-        ingestResult.value = `Ingested ${res.ingestedCount} orders.`;
+        const count = res.ingestedCount ?? 0;
+        ingestResult.value = `Ingested ${count} orders.`;
     }catch(e: any){
         errorMsg.value = e?.data?.message || e?.message || "Failed to ingest orders.";
     }finally{
@@ -72,7 +88,7 @@ async function ingestOrders(){
     }
 }
 
-async function ask(){
+/*async function ask(){
     errorMsg.value = null;
     response.value = null;
 
@@ -93,15 +109,86 @@ async function ask(){
     }finally{
         asking.value = false;
     }
+}*/
+async function ask(){
+    errorMsg.value = null;
+    response.value = null;
+
+    const endpoint = mode.value === 'rag' ? '/api/rag/ask' : '/api/ai/orders/ask';
+
+    const q = question.value.trim();
+    if(!q){
+        errorMsg.value = 'Please enter a question.';
+        return;
+    }
+    asking.value = true;
+    
+    const body = 
+        mode.value === 'rag' ? 
+        {
+            question: q,
+            topK: topK.value
+        } :
+        {
+            question: q
+        };
+    
+    chat.value.push({
+        role: 'user',
+        content: q
+    });
+    
+    try{
+        const res = await post<any>(endpoint, body);
+        if(mode.value === 'rag'){
+            response.value = res;
+        } else {
+            const aiRes = res as OrderAskResponse;
+            response.value = {
+                answer: aiRes.answer,
+                topK: aiRes.usedOrderIds.length,
+                sources: aiRes.usedOrderIds.map(id => ({
+                    id: id.toString(),
+                    preview: `Order ID: ${id}`,
+                    metadata: {}
+                }))
+            };
+        }
+       const assistantText =
+         mode.value === 'rag' ? (res as RagAskResponse).answer : (res as OrderAskResponse).answer;
+       const assistantSources =
+         mode.value === 'rag' ? (res as RagAskResponse).sources : [];
+       chat.value.push({
+            role: 'assistant',
+            content: assistantText,
+            sources: assistantSources
+       });
+    }catch(e: any){
+        errorMsg.value = e?.data?.message || e?.message || "Failed to get an answer.";
+    }finally{
+        asking.value = false;   
+    }
 }
 </script>
 
 <template>
-    <section class="max-w-3xml mx-auto">
+    <section class="max-w-3xl mx-auto">
         <h2 class="text-xl font-semibold mb-2">Assistant</h2>
+
         <p class="text-sm text-gray-600 dark:text-slate-300 mb-6">
              Ingest your orders, then ask questions. The assistant will show the sources it used.
         </p>
+
+        <div class ="flex items-center gap-4 mb-4">
+            <label class="text sm flex items-center gap-2">
+                <input type="radio" value="rag" v-model="mode" />
+                Smart AI
+            </label>
+            <label class="text-sm flex items-center gap-2">
+                <input type="radio" value="simple" v-model="mode" />
+                Simple
+            </label>
+        </div>
         <!--Actions -->
         <div class = "flex flex-col sm:flex-row gap-3 mb-6">
             <button
@@ -158,6 +245,30 @@ async function ask(){
                 {{ asking ? "Asking..." : "Ask" }}
                 </button>
             </div>
+        </div>
+
+
+        <div v-if="chat.length" class="space-y-3 mb-6">
+            <div 
+                v-for="(m,idx) in chat"
+                :key="idx"
+                class = "rounded-lg p-3 border"
+                :class="m.role==='user'
+                    ? 'bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-900/40'
+                    : 'bg-white border-gray-200 dark:bg-slate-900 dark:border-slate-700'"
+                >
+               <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-slate-400 mb-1">
+                {{ m.role }}
+                </div>
+
+                <div class="text-sm whitespace-pre-wrap text-gray-800 dark:text-slate-200">
+                {{ m.content }}
+                </div>
+
+                <div v-if="m.sources?.length" class="mt-3 text-xs text-gray-600 dark:text-slate-300">
+                Sources: {{ m.sources.length }}
+                </div>
+            </div> 
         </div>
 
 
