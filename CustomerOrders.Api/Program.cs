@@ -269,6 +269,38 @@ app.MapDelete("/api/rag/clear", (RagStore ragStore) =>
 .WithName("RagClear")
 .WithOpenApi();
 
+app.MapGet("/api/orders/insights", (IInMemoryStore store) =>
+{
+    var orders = store.GetOrders();
+
+    var totalOrders = orders.Count;
+    var totalItems = orders.Sum(o => o.Quantity);
+    var totalSpend = orders.Sum(o => o.Quantity * o.Price);
+
+    var topProducts = orders
+        .GroupBy(o => o.ProductName)
+        .Select(g => new TopProductDto(
+            Name: g.Key,
+            TotalQty: g.Sum(o => o.Quantity),
+            TotalSpend: g.Sum(o => o.Quantity * o.Price)
+        ))
+        .OrderByDescending(tp => tp.TotalSpend)
+        .Take(5)
+        .ToList();
+
+    var insight = new OrderInsightDto(
+        TotalOrders: totalOrders,
+        TotalItems: totalItems,
+        TotalSpend: totalSpend,
+        TopProducts: topProducts,
+        LastUpdateUTC: DateTimeOffset.UtcNow
+    );
+
+    return Results.Ok(insight);
+})
+.WithName("GetOrderInsights")
+.WithOpenApi();
+
 app.UseForwardedHeaders();
 
 app.Run();

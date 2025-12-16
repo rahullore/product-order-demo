@@ -70,3 +70,7 @@ Accept: application/json
 
 ###
 DELETE {{baseUrl}}/api/rag/clear
+
+###
+GET {{baseUrl}}/api/orders/insights
+Accept: application/json
