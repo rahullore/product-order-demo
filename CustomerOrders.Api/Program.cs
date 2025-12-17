@@ -314,7 +314,7 @@ app.MapGet("/api/orders/insights", (IInMemoryStore store) =>
 .WithName("GetOrderInsights")
 .WithOpenApi();
 
-app.MapPost("/api/vector/index/orders", async (IInMemoryStore store, 
+app.MapPost("/api/vector/build-index", async (IInMemoryStore store, 
     IInMemoryVectorStore vectorStore, 
     IEmbeddingService embeddingService, 
     CancellationToken ct) =>

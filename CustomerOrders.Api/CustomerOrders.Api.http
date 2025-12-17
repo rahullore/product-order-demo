@@ -76,7 +76,7 @@ GET {{baseUrl}}/api/orders/insights
 Accept: application/json
 
 ###
-POST {{baseUrl}}/api/vector/index/orders
+POST {{baseUrl}}/api/vector/build-index
 Content-Type: application/json
 
 ###
@@ -86,8 +86,7 @@ Content-Type: application/json
 Accept: application/json
 
 {
-  "query": "less expensive products ordered",
-  "topK": 4,
-  "type": "product",
-  "Intent": "most_expensive"
+  "query": "total quantity of products ordered",
+  "topK": 4
+  
 }
