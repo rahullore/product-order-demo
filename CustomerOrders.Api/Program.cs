@@ -46,6 +46,8 @@ builder.Services.AddHttpClient<IAiChatService, AiChatService>();
 builder.Services.AddSingleton<IOrderContextBuilder, OrderContextBuilder>();
 builder.Services.AddSingleton<RagService>();
 builder.Services.AddSingleton<RagStore>();
+builder.Services.AddHttpClient<IEmbeddingService, EmbeddingService>();
+builder.Services.AddSingleton<IInMemoryVectorStore, InMemoryVectorStore>();     
 //builder.Services.Configure<OpenAiOptions>(builder.Configuration.GetSection("OpenAi"));
 //load .env variable
 var openAiOptions = new OpenAiOptions
@@ -55,6 +57,14 @@ var openAiOptions = new OpenAiOptions
     Model = Environment.GetEnvironmentVariable("MODEL")
 };
 builder.Services.AddSingleton(openAiOptions);
+
+var embeddingOptions = new EmbeddingOptions
+{
+    ApiKey = Environment.GetEnvironmentVariable("EMBEDDED_API_KEY"),
+    BaseUrl = Environment.GetEnvironmentVariable("EMBEDDED_BASE_URL"),
+    Model = Environment.GetEnvironmentVariable("EMBEDDED_MODEL")
+};
+builder.Services.AddSingleton(embeddingOptions);
 
 builder.Services.AddEndpointsApiExplorer();
 
@@ -300,6 +310,62 @@ app.MapGet("/api/orders/insights", (IInMemoryStore store) =>
 })
 .WithName("GetOrderInsights")
 .WithOpenApi();
+
+app.MapPost("/api/vector/index/orders", async (IInMemoryStore store, 
+    IInMemoryVectorStore vectorStore, 
+    IEmbeddingService embeddingService, 
+    CancellationToken ct) =>
+{
+    var orders =  store.GetOrders();
+
+    foreach(var order in orders)
+    {
+        var text = $"product={order.ProductName}, totalQuantity={order.Quantity}, unitPrice={order.Price}";
+        var embedding = await embeddingService.GetEmbeddingAsync(text, ct);
+        var record = new VectorRecord(
+            Id: $"order-{order.Id}",
+            Vector: embedding,
+            Text: text,
+            Metadata: new Dictionary<string, string>
+            {
+                ["type"] = "order",
+                ["productName"] = order.ProductName,
+                ["unitPrice"] = order.Price.ToString(),
+                ["quantity"] = order.Quantity.ToString()
+            
+            }
+        );
+        vectorStore.UpsertVector(record);
+    }
+
+    return Results.Ok(new {indexed = orders.Count, totalVectors = vectorStore.GetAllVectors().Count });
+}).
+WithName("VectorIndexOrders").
+WithOpenApi();
+
+app.MapPost("/api/vector/search", async(
+    VectorSearchRequest req,
+    IEmbeddingService embeddingService,
+    IInMemoryVectorStore vectorStore,
+    CancellationToken cancellationToken) =>
+{
+    var qVec = await embeddingService.GetEmbeddingAsync(req.Query, cancellationToken);
+    var results = vectorStore.GetAllVectors()
+        .Select(v => new
+        {
+           v.Id,
+           v.Text,
+           Score = VectorMath.CosineSimilarity(qVec, v.Vector)
+        })
+        .OrderByDescending(x => x.Score)
+        .Take(req.TopK)
+        .ToList();
+
+    return Results.Ok(results);
+  
+})
+.WithName("VectorSearch").
+WithOpenApi();
 
 app.UseForwardedHeaders();
 

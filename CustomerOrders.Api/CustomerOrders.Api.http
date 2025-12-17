@@ -74,3 +74,20 @@ DELETE {{baseUrl}}/api/rag/clear
 ###
 GET {{baseUrl}}/api/orders/insights
 Accept: application/json
+
+###
+POST {{baseUrl}}/api/vector/index/orders
+Content-Type: application/json
+
+###
+
+POST {{baseUrl}}/api/vector/search
+Content-Type: application/json
+Accept: application/json
+
+{
+  "query": "least expensive products ordered",
+  "topK": 4,
+  "type": "product",
+  "Intent": "most_expensive"
+}
