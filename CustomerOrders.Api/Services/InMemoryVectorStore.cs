@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-
+using CustomerOrders.Api.Models;
 public interface IInMemoryVectorStore
 {
     void UpsertVector(VectorRecord record);

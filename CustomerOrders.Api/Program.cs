@@ -2,6 +2,7 @@ using CustomerOrders.Api.Services;
 using CustomerOrders.Api.Models;
 using CustomerOrders.Api.Config;
 using DotNetEnv;
+using  System.Globalization;
 using System.Data.Common;
 using System.IO.Pipelines;
 using System.Security.Cryptography.X509Certificates;
@@ -47,7 +48,9 @@ builder.Services.AddSingleton<IOrderContextBuilder, OrderContextBuilder>();
 builder.Services.AddSingleton<RagService>();
 builder.Services.AddSingleton<RagStore>();
 builder.Services.AddHttpClient<IEmbeddingService, EmbeddingService>();
-builder.Services.AddSingleton<IInMemoryVectorStore, InMemoryVectorStore>();     
+builder.Services.AddSingleton<IInMemoryVectorStore, InMemoryVectorStore>();  
+builder.Services.AddSingleton<ISearchPlanner, LlmSearchPlanner>();
+
 //builder.Services.Configure<OpenAiOptions>(builder.Configuration.GetSection("OpenAi"));
 //load .env variable
 var openAiOptions = new OpenAiOptions
@@ -320,7 +323,7 @@ app.MapPost("/api/vector/index/orders", async (IInMemoryStore store,
 
     foreach(var order in orders)
     {
-        var text = $"product={order.ProductName}, totalQuantity={order.Quantity}, unitPrice={order.Price}";
+        var text = $"Order {order.Id}: product={order.ProductName}, quantity={order.Quantity}, unitPrice={order.Price}";
         var embedding = await embeddingService.GetEmbeddingAsync(text, ct);
         var record = new VectorRecord(
             Id: $"order-{order.Id}",
@@ -338,30 +341,85 @@ app.MapPost("/api/vector/index/orders", async (IInMemoryStore store,
         vectorStore.UpsertVector(record);
     }
 
-    return Results.Ok(new {indexed = orders.Count, totalVectors = vectorStore.GetAllVectors().Count });
+    
+    var products = orders
+        .GroupBy(o => o.ProductName)
+        .Select(g => new
+        {
+            ProductName = g.Key,
+            TotalQty = g.Sum(x => x.Quantity),
+            UnitPrice = g.First().Price,            
+            TotalSpend = g.Sum(x => x.Price * x.Quantity),
+            OrderCount = g.Count()
+        });
+
+    foreach (var p in products)
+    {
+        var text =
+            $"Product={p.ProductName}, totalQty={p.TotalQty}, unitPrice={p.UnitPrice}, totalSpend={p.TotalSpend}, orderCount={p.OrderCount}";
+
+        var embedding = await embeddingService.GetEmbeddingAsync(text, ct);
+
+        var record = new VectorRecord(
+            Id: $"product-{p.ProductName}",
+            Vector: embedding,
+            Text: text,
+            Metadata: new Dictionary<string, string>
+            {
+                ["type"] = "product",
+                ["productName"] = p.ProductName,
+                ["unitPrice"] = p.UnitPrice.ToString(CultureInfo.InvariantCulture),
+                ["totalQty"] = p.TotalQty.ToString(CultureInfo.InvariantCulture),
+                ["totalSpend"] = p.TotalSpend.ToString(CultureInfo.InvariantCulture),
+                ["orderCount"] = p.OrderCount.ToString(CultureInfo.InvariantCulture)
+            }
+        );
+
+        vectorStore.UpsertVector(record);
+    }
+
+    return Results.Ok(new
+    {
+        indexedOrders = orders.Count,
+        indexedProducts = products.Count(),
+        totalVectors = vectorStore.GetAllVectors().Count
+    });
 }).
 WithName("VectorIndexOrders").
 WithOpenApi();
 
 app.MapPost("/api/vector/search", async(
     VectorSearchRequest req,
+    ISearchPlanner searchPlanner,
     IEmbeddingService embeddingService,
     IInMemoryVectorStore vectorStore,
     CancellationToken cancellationToken) =>
 {
+    var plan = await searchPlanner.CreateSearchPlanAsync(req.Query, cancellationToken);
+    Console.WriteLine($"Search Plan: Target={plan.Target}, Ranking={plan.Ranking}, RankingField={plan.RankingField}");
     var qVec = await embeddingService.GetEmbeddingAsync(req.Query, cancellationToken);
-    var results = vectorStore.GetAllVectors()
+    var candidates = vectorStore.GetAllVectors()
+        .Where(v => v.Metadata["type"] == plan.Target)
         .Select(v => new
         {
            v.Id,
            v.Text,
+           v.Metadata,
            Score = VectorMath.CosineSimilarity(qVec, v.Vector)
         })
         .OrderByDescending(x => x.Score)
         .Take(req.TopK)
         .ToList();
 
-    return Results.Ok(results);
+     IEnumerable<dynamic> ranked = plan.Ranking switch
+        {
+            "min" => candidates.OrderBy(x => searchPlanner.GetDecimal(x.Metadata, plan.RankingField)),
+            "max" => candidates.OrderByDescending(x => searchPlanner.GetDecimal(x.Metadata, plan.RankingField)),
+            "sum" => candidates.OrderByDescending(x => searchPlanner.GetDecimal(x.Metadata, plan.RankingField)),
+            _ => candidates
+        };
+
+    return Results.Ok(ranked.Take(req.TopK));
   
 })
 .WithName("VectorSearch").

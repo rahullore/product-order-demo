@@ -86,7 +86,7 @@ Content-Type: application/json
 Accept: application/json
 
 {
-  "query": "least expensive products ordered",
+  "query": "less expensive products ordered",
   "topK": 4,
   "type": "product",
   "Intent": "most_expensive"
