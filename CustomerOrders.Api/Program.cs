@@ -388,6 +388,14 @@ app.MapPost("/api/vector/build-index", async (IInMemoryStore store,
 WithName("VectorIndexOrders").
 WithOpenApi();
 
+app.MapDelete("/api/vector/clear", (IInMemoryVectorStore vectorStore) =>
+{
+    vectorStore.ClearStore();
+    return Results.NoContent();
+}).
+WithName("VectorClearStore").
+WithOpenApi();
+
 app.MapPost("/api/vector/search", async(
     VectorSearchRequest req,
     ISearchPlanner searchPlanner,

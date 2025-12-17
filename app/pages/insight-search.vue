@@ -1,5 +1,9 @@
 <script setup lang="ts">
-    const{post} = useApi();
+    
+    import {useToasts} from '~/composables/useToasts'; 
+    const { showToast } = useToasts();
+    const{post, del} = useApi();
+   
 
     type VectorSearchResponseItem = {
         id: string;
@@ -49,9 +53,23 @@
         try {
             var res = await post<VectorBuildIndexResponse>('/api/vector/build-index', {});
             console.log('Index build result:', res);
+            showToast(`Index built successfully!`, 'success');
         } catch (err:any) {
             console.error('Build index error:', err);
             errorMsg.value = err?.message || 'An error occurred during index building.';
+            showToast(`Failed to build index.`, 'error');
+        } 
+    }
+
+    async function DeleteVectorStore(){
+        try {
+            await del<void>('/api/vector/clear');
+            console.log('Vector store cleared.');
+            showToast(`Vector store cleared successfully!`, 'success');
+        } catch (err:any) {
+            console.error('Clear vector store error:', err);
+            errorMsg.value = err?.message || 'An error occurred while clearing the vector store.';
+            showToast(`Failed to clear vector store.`, 'error');
         } 
     }
 
@@ -64,7 +82,7 @@
         results.value = [];
 
         try {
-            await BuildIndex();
+            
             const res = await post<VectorSearchResponseItem[]>('/api/vector/search', {
                 query: q,
                 topK: topK.value,
@@ -104,6 +122,24 @@
                      class="w-20 rounded-md border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-950 px-3 py-2 text-sm"
                 />
                
+            </div>
+
+            <div class="flex border-t border-gray-600 dark:border-slate-600">
+                <button
+                    @click="BuildIndex"
+                    :disabled="loading"
+                    class="rounded-md bg-blue-600 text-white px-4 py-2 text-sm font-medium hover:bg-blue-700 disabled:opacity-60">
+                    Build
+                </button>
+            </div>
+
+            <div class="flex border-t border-gray-300 dark:border-slate-600">
+                <button
+                    @click="DeleteVectorStore"
+                    :disabled="loading"
+                    class="rounded-md bg-blue-600 text-white px-4 py-2 text-sm font-medium hover:bg-blue-700 disabled:opacity-60">
+                    Delete
+                </button>
             </div>
         </div>
 

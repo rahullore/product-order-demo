@@ -4,6 +4,10 @@ public interface IInMemoryVectorStore
 {
     void UpsertVector(VectorRecord record);
     IReadOnlyList<VectorRecord> GetAllVectors();
+
+    void DeleteVector(string id);
+
+    void ClearStore();
 }
 public class InMemoryVectorStore : IInMemoryVectorStore
 {
@@ -16,6 +20,16 @@ public class InMemoryVectorStore : IInMemoryVectorStore
     }
 
     public IReadOnlyList<VectorRecord> GetAllVectors() => _vectors;
+
+    public void DeleteVector(string id)
+    {
+        _vectors.RemoveAll(v => v.Id == id);
+    }
+
+    public void ClearStore()
+    {
+        _vectors.Clear();
+    }
 }
 
 public static class VectorMath
