@@ -29,7 +29,7 @@ function onKeydown(e: KeyboardEvent) {
             @keydown="onKeydown"
             rows="3"
             class="w-full rounded-md border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-950 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="e.g., least expensive product • most ordered product • orders about infusion pump"
+            placeholder="e.g., do I have any wire items in list"
         ></textarea>
 
         <div class="mt-3 flex items-center justify-between gap-3">
