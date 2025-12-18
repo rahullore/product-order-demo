@@ -1,4 +1,5 @@
 using CustomerOrders.Api.Models;
+using Microsoft.VisualBasic;
 
 namespace CustomerOrders.Api.Services;
 
@@ -10,6 +11,7 @@ public interface IInMemoryStore
     OrderDto? GetOrder(int id);
     OrderDto AddOrder(int productId, int quantity);
     void ClearOrders();
+    ProductDto AddProduct(string name, string description, decimal price, int stock);
 }
 
 public sealed class InMemoryStore : IInMemoryStore
@@ -43,10 +45,6 @@ public sealed class InMemoryStore : IInMemoryStore
             new(18, "Patient Monitor", "Multi-parameter patient monitor", 2499.99m, 5),
             new(19, "Infusion Stand", "Adjustable infusion stand", 199.99m, 20),
             new(20, "Medical Cart", "Mobile medical equipment cart", 299.99m, 10)
-
-
-
-
         };
     }
 
@@ -82,5 +80,30 @@ public sealed class InMemoryStore : IInMemoryStore
     {
         _orders.Clear();
         _nextOrderId = 1;
+    }
+
+    public ProductDto AddProduct(string name, string description, decimal price, int stock)
+    {
+       if(string.IsNullOrWhiteSpace(name))
+       {
+            throw new ArgumentException("Product name cannot be empty.", nameof(name));
+       }
+         if(price < 0)
+         {
+                throw new ArgumentException("Product price cannot be negative.", nameof(price));
+         }
+         if(stock < 0)
+         {
+                throw new ArgumentException("Product stock cannot be negative.", nameof(stock));
+         }
+         var product = new ProductDto(
+            Id: _products.Max(p => p.Id) + 1,
+            Name: name,
+            Description: description,
+            Price: price,
+            Stock: stock
+         );
+         _products.Add(product);
+         return product;
     }
 }

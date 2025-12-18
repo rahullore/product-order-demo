@@ -90,3 +90,14 @@ Accept: application/json
   "topK": 4
   
 }
+
+###
+POST {{baseUrl}}/api/products
+Content-Type: application/json
+
+{
+  "name": "New Product",
+  "description": "This is a newly added product.",
+  "price": 29.99,
+  "stock": 100
+}

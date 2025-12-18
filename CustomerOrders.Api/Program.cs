@@ -433,6 +433,21 @@ app.MapPost("/api/vector/search", async(
 .WithName("VectorSearch").
 WithOpenApi();
 
+app.MapPost("/api/products", (CreateProductRequest request, IInMemoryStore store) =>
+{
+    try
+    {
+        var product = store.AddProduct(request.Name, request.Description, request.Price, request.Stock);
+        return Results.Created($"/api/products/{product.Id}", product);
+    }
+    catch (ArgumentException ex)
+    {
+        return Results.BadRequest(ex.Message);
+    }
+})
+.WithName("CreateProduct")
+.WithOpenApi();
+
 app.UseForwardedHeaders();
 
 app.Run();

@@ -10,6 +10,16 @@ services:
       - API_KEY=${API_KEY}
       - BASE_URL=${BASE_URL}
       - MODEL=${MODEL}
+      #open ai settings
+      - EMBEDDED_API_KEY=${EMBEDDED_API_KEY}
+      - EMBEDDED_BASE_URL=${EMBEDDED_BASE_URL}
+      - EMBEDDED_MODEL=${EMBEDDED_MODEL}
+      #sql server settings
+      - DB_HOST=sqlserver
+      - DB_PORT=1433
+      - DB_USER=sa
+      - DB_PASSWORD=Your_password123!
+      - DB_NAME=ProductOrders
     ports:
       - "5178:8080"  # host port -> container port
     networks:
@@ -31,5 +41,28 @@ services:
     networks:
       - appnet
 
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: product-orders-sql
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=Your_password123!
+    ports:
+      - "1433:1433"
+    volumes:
+      - sql_data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'Your_password123!' -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - appnet
+
 networks:
   appnet:
+volumes:
+  sql_data:
