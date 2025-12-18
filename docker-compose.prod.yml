@@ -15,11 +15,8 @@ services:
       - EMBEDDED_BASE_URL=${EMBEDDED_BASE_URL}
       - EMBEDDED_MODEL=${EMBEDDED_MODEL}
       #sql server settings
-      - DB_HOST=sqlserver
-      - DB_PORT=1433
-      - DB_USER=sa
-      - DB_PASSWORD=Your_password123!
-      - DB_NAME=ProductOrders
+      - ConnectionStrings__Sql=Server=sqlserver,1433;Database=ProductOrders;User Id=sa;Password=Your_password123!;TrustServerCertificate=True;
+
     ports:
       - "5178:8080"  # host port -> container port
     networks:
