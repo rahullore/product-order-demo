@@ -2,6 +2,10 @@ using CustomerOrders.Api.Services;
 using CustomerOrders.Api.Models;
 using CustomerOrders.Api.Config;
 using DotNetEnv;
+using CustomerOrders.Api.Data;
+using Microsoft.EntityFrameworkCore;
+
+
 using  System.Globalization;
 using System.Data.Common;
 using System.IO.Pipelines;
@@ -27,6 +31,7 @@ using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Data;
 using System.Reflection.Emit;
+using System.Runtime.InteropServices;
 
 Env.Load();
 
@@ -50,6 +55,9 @@ builder.Services.AddSingleton<RagStore>();
 builder.Services.AddHttpClient<IEmbeddingService, EmbeddingService>();
 builder.Services.AddSingleton<IInMemoryVectorStore, InMemoryVectorStore>();  
 builder.Services.AddSingleton<ISearchPlanner, LlmSearchPlanner>();
+builder.Services.AddDbContext<AppDbContext>(opt=>opt.UseSqlServer(
+    builder.Configuration.GetConnectionString("Sql")
+));
 
 //builder.Services.Configure<OpenAiOptions>(builder.Configuration.GetSection("OpenAi"));
 //load .env variable
@@ -449,5 +457,11 @@ app.MapPost("/api/products", (CreateProductRequest request, IInMemoryStore store
 .WithOpenApi();
 
 app.UseForwardedHeaders();
+
+using(var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    dbContext.Database.Migrate();
+}
 
 app.Run();
