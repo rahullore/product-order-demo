@@ -64,5 +64,51 @@ useHead({
         </li>
         </ul>
 
+        <footer class="mt-12 border-t border-gray-200 pt-6 text-sm text-gray-600">
+  <div class="flex flex-col md:flex-row justify-between items-center gap-3">
+    
+    <p>
+      © 2025 <strong>Rahul Lore</strong>. All rights reserved.
+    </p>
+
+    <div class="flex items-center gap-4">
+      <a
+        href="mailto:rahullore@gmail.com"
+        class="hover:text-gray-900 transition"
+      >
+        rahullore@gmail.com
+      </a>
+
+      <span class="hidden md:inline text-gray-400">|</span>
+
+      <a
+        href="https://www.linkedin.com/in/rahullore"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="hover:text-gray-900 transition"
+      >
+        LinkedIn
+      </a>
+
+      <span class="hidden md:inline text-gray-400">|</span>
+
+      <a
+        href="https://github.com/rahullore"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="hover:text-gray-900 transition"
+      >
+        GitHub
+      </a>
+    </div>
+
+  </div>
+
+  <p class="mt-3 text-xs text-gray-500 text-center md:text-left">
+    This site and its projects are built to demonstrate real-world system design, engineering practices, and AI-assisted workflows as an examples.
+  </p>
+</footer>
+
+
     </section>
 </template>
