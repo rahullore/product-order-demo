@@ -23,6 +23,7 @@ const { theme, toggleTheme } = useTheme();
                     <NuxtLink to="/assistant" class="hover:text-blue-600 dark:hover:text-blue-400" :class="{'text-blue-600 font-semibold' : route.path==='/assistant' }">Assistant</NuxtLink>
                     <NuxtLink to="/insights" class="hover:text-blue-600 dark:hover:text-blue-400" :class="{'text-blue-600 font-semibold' : route.path==='/insights' }">Insights</NuxtLink>
                     <NuxtLink to="/insight-search" class="hover:text-blue-600 dark:hover:text-blue-400" :class="{'text-blue-600 font-semibold' : route.path==='/insight-search' }">Smart Search</NuxtLink>
+                    <NuxtLink to="/sqlcopilot" class="hover:text-blue-600 dark:hover:text-blue-400" :class="{'text-blue-600 font-semibold' : route.path==='/sqlcopilot' }">SQL Copilot</NuxtLink>
 
 
                 </nav>
