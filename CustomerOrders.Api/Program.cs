@@ -49,7 +49,7 @@ builder.Services.AddCors(options =>
     });
 }); 
 
-builder.Services.AddSingleton<IInMemoryStore, InMemoryStore>();
+builder.Services.AddScoped<IInMemoryStore, ProductOrderDbService>();
 builder.Services.AddHttpClient<IAiChatService, AiChatService>();
 builder.Services.AddSingleton<IOrderContextBuilder, OrderContextBuilder>();
 builder.Services.AddSingleton<RagService>();
