@@ -101,3 +101,47 @@ Content-Type: application/json
   "price": 29.99,
   "stock": 100
 }
+
+###
+POST {{baseUrl}}/api/sqlcopilot/generate
+Content-Type: application/json
+
+{ 
+  "instruction": "Add a product called Demo Pump with description Test price 123.45 stock 7" 
+}
+
+###
+POST {{baseUrl}}/api/sqlcopilot/generate
+Content-Type: application/json
+
+{ 
+  "instruction": "Get me the names and prices of all products that cost more than 50" 
+}
+
+###
+POST {{baseUrl}}/api/sqlcopilot/execute
+Content-Type: application/json
+
+{
+  "tableName": "Products",
+  "sql": "INSERT INTO Products (Name, Description, Price, Stock) VALUES (@name, @description, @price, @stock)",
+  "parameters": {
+    "@name": "Demo Pump",
+    "@description": "Test",
+    "@price": 123.45,
+    "@stock": 7 
+    }
+}
+
+###
+
+POST {{baseUrl}}/api/sqlcopilot/execute
+Content-Type: application/json
+
+{
+  "tableName": "Products",
+  "sql": "SELECT Name, Price, Description FROM Products WHERE Price > @priceThreshold",
+  "parameters": {
+    "@priceThreshold": 50
+    }
+}

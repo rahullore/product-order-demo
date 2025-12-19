@@ -4,7 +4,9 @@ using CustomerOrders.Api.Config;
 using DotNetEnv;
 using CustomerOrders.Api.Data;
 using Microsoft.EntityFrameworkCore;
-
+using Microsoft.SemanticKernel;
+using CustomerOrders.Api.Services.Ai.SqlCopilot;
+using CustomerOrders.Api.Services.DbTools;
 
 using  System.Globalization;
 using System.Data.Common;
@@ -58,6 +60,20 @@ builder.Services.AddSingleton<ISearchPlanner, LlmSearchPlanner>();
 builder.Services.AddDbContext<AppDbContext>(opt=>opt.UseSqlServer(
     builder.Configuration.GetConnectionString("Sql")
 ));
+
+builder.Services.AddSingleton<CustomerOrders.Api.Services.DbTools.SqlTools>();
+builder.Services.AddSingleton<ISqlCopilotService, SqlCopilotService>();
+
+builder.Services.AddSingleton(sp =>
+{
+    var kernelBuilder = Kernel.CreateBuilder();
+    kernelBuilder.AddOpenAIChatCompletion(
+        modelId: "gpt-4o-mini",
+        apiKey: Environment.GetEnvironmentVariable("EMBEDDED_API_KEY"),
+        endpoint: new Uri(Environment.GetEnvironmentVariable("EMBEDDED_BASE_URL"))
+    );
+    return kernelBuilder.Build();
+});
 
 //builder.Services.Configure<OpenAiOptions>(builder.Configuration.GetSection("OpenAi"));
 //load .env variable
@@ -455,6 +471,63 @@ app.MapPost("/api/products", (CreateProductRequest request, IInMemoryStore store
 })
 .WithName("CreateProduct")
 .WithOpenApi();
+
+
+app.MapPost("/api/sqlcopilot/generate", async(
+    SqlGenerateRequest req,
+    ISqlCopilotService sqlCopilot,
+    CancellationToken ct) =>
+    {
+        if(string.IsNullOrWhiteSpace(req.Instruction))
+        {
+            return Results.BadRequest("Instruction is required.");
+        }
+
+        try
+        {
+            var response = await sqlCopilot.GenerateSqlAsync(req.Instruction, ct);
+            return Results.Ok(response);
+        }
+        catch(InvalidOperationException ex)
+        {
+            return Results.Problem(
+                detail: ex.Message,
+                statusCode: StatusCodes.Status500InternalServerError
+            );
+        }
+    }
+)
+.WithName("SqlCopilotGenerate")
+.WithOpenApi();
+
+app.MapPost("/api/sqlcopilot/execute", async(
+    SqlExecuteRequest req,
+    ISqlCopilotService sqlCopilot,
+    CancellationToken ct) =>
+    {
+        if(string.IsNullOrWhiteSpace(req.Sql))
+        {
+            return Results.BadRequest("SQL statement is required.");
+        }
+
+        try
+        {
+            var response = await sqlCopilot.ExecuteSqlAsync(req, ct);
+            return Results.Ok(response);
+        }
+        catch(ArgumentException ex)
+        {
+            return Results.BadRequest(ex.Message);
+        }
+        catch(InvalidOperationException ex)
+        {
+            return Results.Problem(
+                detail: ex.Message,
+                statusCode: StatusCodes.Status500InternalServerError
+            );
+        }
+    }).WithName("SqlCopilotExecute")
+    .WithOpenApi();
 
 app.UseForwardedHeaders();
 
