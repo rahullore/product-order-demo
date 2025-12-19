@@ -48,8 +48,12 @@ public class SqlCopilotService : ISqlCopilotService
                 - sql must be ONE statement. No comments. No multiple statements.
                 - For parameters, use an object with keys without '@' (example: {"name":"x","price":12.3})
                 - Prefer parameterized SQL using @param names.
-                - Allowed statements: SELECT, INSERT INTO Products, UPDATE Products
+                - Allowed statements: SELECT, INSERT INTO Products, UPDATE Products, INSERT INTO Orders, Update Orders
+                - Use the following logic for statements:
                 - If instruction asks to add product: INSERT into Products (Name, Description, Price, Stock)
+                - If instruction asks to update product stock, price, name : UPDATE Products SET Stock = @stock, Price = @price, Name = @name WHERE Id = @id
+                - if instruction asks to add order: INSERT into Orders (ProductId, Quantity, UnitPrice, CreatedAtUtc) and use Products table to get Price based on ProductId
+                - if instruction asks to update order quantity: UPDATE Orders SET Quantity = @quantity WHERE Id = @id
                 - If instruction asks to query: SELECT
 
                 Schema (JSON):
