@@ -90,7 +90,7 @@ useHead({
         LinkedIn
       </a>
 
-      <span class="hidden md:inline text-gray-400">|</span>
+      <!-- <span class="hidden md:inline text-gray-400">|</span>
 
       <a
         href="https://github.com/rahullore"
@@ -99,7 +99,7 @@ useHead({
         class="hover:text-gray-900 transition"
       >
         GitHub
-      </a>
+      </a> -->
     </div>
 
   </div>
