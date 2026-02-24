@@ -10,7 +10,7 @@ useHead({
 <template>
     <section class="bg-white rounded-lg shadow p-6">
         <h2 class="text-lg font-semibold mb-4 text-gray-800">
-            Welcome to the Customer Orders App
+            Welcome to my Customer Orders App
         </h2>
         <p class="text-sm text-gray-700 mb-4">
             The Customer Orders App is a production-grade, full-stack demo built end-to-end to showcase how modern systems are designed, delivered, and operated in the real world. This is not a tutorial project—it reflects the same architectural thinking, engineering rigor, and operational discipline I apply when building enterprise systems.
