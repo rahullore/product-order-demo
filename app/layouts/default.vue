@@ -9,7 +9,7 @@ const { theme, toggleTheme } = useTheme();
         <header class="bg-white shadow dark:bg-slate-800">
             <div class="max-w-4xl mx-auto px-4 py-4 flex item-center justify-between">
                 <h1 class="text-xl font-semibold text-gray-800 dark:text-slate-200">
-                    Customer Orders App
+                    Rahul Customer Orders App
                 </h1>
                 <nav class="space-x-4 text-sm">
                     <NuxtLink to="/" class="hover:text-blue-600 dark:hover:text-blue-400" :class="{'text-blue-600 font-semibold' : route.path==='/' }">Home</NuxtLink>
